@@ -1,0 +1,486 @@
+// Robomaster 战队管理网站 - 数据模型
+// 对应需求：基础功能、队员管理、赛事管理、机器人研发、物资、日常运营、协作等
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ========== 用户与权限 ==========
+// SQLite 不支持 enum，用 String 存储。取值：SUPER_ADMIN, MODULE_ADMIN, MEMBER, TEACHER, GUEST
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  phone         String?   @unique
+  passwordHash  String?   // bcrypt 加密
+  name          String
+  role          String    @default("GUEST")
+  emailVerified DateTime?
+  phoneVerified DateTime?
+  rememberToken String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  teamJoinRequest TeamJoinRequest[]
+  sessions      Session[]
+  logs          AuditLog[]
+  messagesSent  Message[] @relation("MessageSender")
+  messagesReceived Message[] @relation("MessageReceiver")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 队员档案（扩展信息）
+model Profile {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId    String?
+  major        String?       // 专业
+  avatar       String?
+  bio          String?       // 个人简介
+  groupId      String?
+  group        TeamGroup?    @relation(fields: [groupId], references: [id])
+  joinAt       DateTime?
+  position     String?       // 职位
+  responsibility String?    // 负责方向。status: ACTIVE=在队, RETIRED=退役, LEAVE=请假
+  status       String    @default("ACTIVE")
+
+  attendances   Attendance[]
+  growthRecords GrowthRecord[]
+  taskAssignments TaskAssignment[]
+  posts         Post[]
+  replies       Reply[]
+}
+
+// 战队加入申请（队长审核）
+model TeamJoinRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId   String?
+  group     TeamGroup? @relation(fields: [groupId], references: [id])
+  intro     String?  // 个人简介
+  status    String   @default("pending") // pending, approved, rejected
+  reviewedAt DateTime?
+  reviewedBy String?
+  createdAt DateTime @default(now())
+}
+
+// ========== 战队与组别 ==========
+model TeamConfig {
+  id          String   @id @default(cuid())
+  name        String   // 战队名称
+  logo        String?
+  slogan      String?
+  intro       String?  // 简介
+  primaryColor String? @default("#e63946")
+  navLayout   String?  // 导航栏布局配置（JSON 字符串）
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamGroup {
+  id          String   @id @default(cuid())
+  name        String   // 机械组、电控组、算法组等
+  description String?
+  order       Int      @default(0)
+
+  profiles    Profile[]
+  joinRequests TeamJoinRequest[]
+  tasks       Task[]   @relation("TaskGroup")
+}
+
+// ========== 考勤 ==========
+model AttendanceTask {
+  id          String   @id @default(cuid())
+  title       String
+  type        String   // 训练、会议、赛事筹备
+  startAt     DateTime
+  endAt       DateTime
+  location    String?
+  checkType   String   // 签到、签退、定位签到
+  createdAt   DateTime @default(now())
+  attendances Attendance[]
+}
+
+model Attendance {
+  id           String   @id @default(cuid())
+  taskId       String
+  task         AttendanceTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  checkInAt    DateTime?
+  checkOutAt   DateTime?
+  status       String?  // 正常、迟到、早退、缺席、补签
+  needReview   Boolean  @default(false) // 补签需审核
+  reviewedAt   DateTime?
+  createdAt    DateTime @default(now())
+}
+
+// ========== 成长记录 ==========
+model GrowthRecord {
+  id        String   @id @default(cuid())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  content   String   // 参与项目、赛事、培训、技能、荣誉、评价
+  type      String?  // 项目、赛事、培训、荣誉等
+  evidence  String?  // 图片/附件
+  rating    String?  // 导师评价
+  status    String   @default("draft") // draft, submitted, approved
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========== 赛事 ==========
+model Competition {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // 分区赛、国赛、友谊赛
+  startAt     DateTime
+  endAt       DateTime
+  location    String?
+  theme       String?
+  ruleUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schedules   CompetitionSchedule[]
+  preparations PreparationPlan[]
+  results     CompetitionResult[]
+  debriefs    Debrief[]
+  enrollments CompetitionEnrollment[]
+}
+
+model CompetitionSchedule {
+  id            String   @id @default(cuid())
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  matchTime     DateTime
+  opponent      String?
+  venue         String?
+  createdAt     DateTime @default(now())
+}
+
+model PreparationPlan {
+  id            String   @id @default(cuid())
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  title         String
+  content       String?
+  startAt       DateTime
+  endAt         DateTime
+  assigneeId    String?
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+}
+
+model CompetitionResult {
+  id            String   @id @default(cuid())
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  matchName     String?
+  score         String?
+  win           Boolean?
+  detail        String?
+  mediaUrls     String?  // 视频/照片 JSON
+  createdAt     DateTime @default(now())
+}
+
+model Debrief {
+  id            String   @id @default(cuid())
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  title         String
+  content       String
+  summary       String?
+  improvement   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CompetitionEnrollment {
+  id            String   @id @default(cuid())
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  profileId     String?
+  materials     String?  // 提交材料 JSON
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+}
+
+// ========== 机器人研发 ==========
+model Robot {
+  id          String   @id @default(cuid())
+  name        String
+  model       String?
+  purpose     String?
+  developedAt DateTime?
+  weight      String?
+  size        String?
+  power       String?
+  control     String?
+  version     String?  // V1.0, V2.0
+  changeLog   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documents   RobotDocument[]
+  faults      FaultReport[]
+}
+
+model RobotDocument {
+  id        String   @id @default(cuid())
+  robotId   String?
+  robot     Robot?   @relation(fields: [robotId], references: [id], onDelete: SetNull)
+  title     String
+  category  String?  // 设计、调试、测试 / 机械、电控、算法
+  fileUrl   String
+  fileType  String?
+  authorId  String?
+  createdAt DateTime @default(now())
+}
+
+model FaultReport {
+  id          String   @id @default(cuid())
+  robotId     String?
+  robot       Robot?   @relation(fields: [robotId], references: [id], onDelete: SetNull)
+  description String
+  type        String?  // 机械、电控、算法
+  mediaUrls   String?
+  scene       String?
+  solution    String?
+  resolvedAt  DateTime?
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+}
+
+// ========== 物资 ==========
+model MaterialCategory {
+  id       String    @id @default(cuid())
+  name     String    // 机械零件、电控元件等
+  order    Int       @default(0)
+  materials Material[]
+}
+
+model Material {
+  id          String   @id @default(cuid())
+  categoryId  String
+  category    MaterialCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  spec        String?
+  quantity    Int      @default(0)
+  unitPrice   Float?
+  purchasedAt DateTime?
+  supplier    String?
+  storage     String?
+  imageUrl    String?
+  alertThreshold Int?  // 库存预警线
+  expireAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  inOutRecords MaterialInOut[]
+}
+
+model MaterialInOut {
+  id         String   @id @default(cuid())
+  materialId String
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  type       String   // in, out, return
+  quantity   Int
+  purpose    String?
+  operatorId String?
+  at         DateTime @default(now())
+  note       String?
+}
+
+// ========== 任务与会议 ==========
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  type        String?  // 训练、宣传、办公
+  dueAt       DateTime?
+  groupId     String?
+  group       TeamGroup? @relation("TaskGroup", fields: [groupId], references: [id])
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignments TaskAssignment[]
+}
+
+model TaskAssignment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  progress  String?  // 未开始、进行中、已完成、卡顿
+  result    String?
+  resultMedia String?
+  feedback  String?
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Meeting {
+  id        String   @id @default(cuid())
+  title     String
+  startAt   DateTime
+  endAt     DateTime
+  location  String?
+  attendeeIds String? // JSON 参会人 ID 列表
+  summary   String?  // 会议纪要
+  createdAt DateTime @default(now())
+}
+
+// ========== 经费 ==========
+model FinanceRecord {
+  id        String   @id @default(cuid())
+  type      String   // income, expense
+  category  String?  // 赞助、拨款、采购、赛事、办公
+  amount    Float
+  at        DateTime @default(now())
+  operatorId String?
+  note      String?
+  attachment String?
+}
+
+// ========== 通知公告 ==========
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String?  // 内部通知、对外公告
+  isPinned  Boolean  @default(false)
+  publishedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+// ========== 对外展示 ==========
+model Honor {
+  id        String   @id @default(cuid())
+  title     String
+  type      String?  // 赛事荣誉、其他荣誉
+  year      Int?
+  mediaUrls String?
+  memberNames String?
+  createdAt DateTime @default(now())
+}
+
+model MediaGallery {
+  id        String   @id @default(cuid())
+  title     String
+  type      String?  // 训练、赛事、宣传
+  url       String
+  thumb     String?
+  createdAt DateTime @default(now())
+}
+
+model Recruitment {
+  id        String   @id @default(cuid())
+  phase     String   @default("closed") // 未开始、招募中、已结束
+  startAt   DateTime?
+  endAt     DateTime?
+  content   String?
+  groups    String?  // JSON 各组要求
+  updatedAt DateTime @updatedAt
+}
+
+model RecruitmentApplication {
+  id        String   @id @default(cuid())
+  name      String
+  contact   String
+  major     String?
+  groupId   String?
+  intro     String?
+  attachments String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model Sponsor {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String?
+  url       String?
+  policy    String?
+  contact   String?
+  createdAt DateTime @default(now())
+}
+
+// ========== 讨论区 ==========
+model ForumSection {
+  id       String   @id @default(cuid())
+  name     String
+  type     String?  // 按组别、按主题
+  groupId  String?
+  order    Int      @default(0)
+  posts    Post[]
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  sectionId String
+  section   ForumSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  mediaUrls String?
+  isPinned  Boolean  @default(false)
+  isHighlight Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  replies   Reply[]
+}
+
+model Reply {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  status    String   @default("pending") // 待审核、通过、拒绝
+  createdAt DateTime @default(now())
+}
+
+// ========== 消息 ==========
+model Message {
+  id        String   @id @default(cuid())
+  senderId  String
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver  User     @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  type      String?  // 任务提醒、会议提醒、系统通知等
+  title     String
+  body      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+// ========== 审计日志 ==========
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // login, update, delete
+  resource  String?
+  detail    String?
+  ip        String?
+  createdAt DateTime @default(now())
+}

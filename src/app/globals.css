@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #e63946;
+  --primary-foreground: #fff;
+  --secondary: #1d3557;
+  --secondary-foreground: #fff;
+  --accent: #457b9d;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f8fafc;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* 移动端适配 */
+@layer utilities {
+  .touch-action-manipulation {
+    touch-action: manipulation;
+  }
+}

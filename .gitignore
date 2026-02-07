@@ -1,0 +1,27 @@
+# dependencies
+node_modules
+.pnp
+.pnp.js
+# build
+.next
+out
+# env
+.env
+.env*.local
+# prisma
+prisma/migrations
+prisma/*.db
+prisma/*.db-journal
+# misc
+.DS_Store
+*.pem
+# debug
+npm-debug.log*
+# IDE
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
