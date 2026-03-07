@@ -1,0 +1,13 @@
+# 部署时排除 Next.js/Node 相关，让 Vercel 按 Flask 项目构建
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+next.config.js
+next.config.mjs
+next.config.ts
+node_modules
+prisma
+src
+public
+.next
