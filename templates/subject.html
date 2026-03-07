@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ section.name }} · {{ category.name }} · {{ subject.name }}{% endblock %}
+{% block content %}
+<header class="section-header subject-header">
+    <nav class="breadcrumb">
+        <a href="{{ url_for('section', section_id=section.id) }}">{{ section.icon }} {{ section.name }}</a>
+        <span class="sep">/</span>
+        <span>{{ category.name }}</span>
+        <span class="sep">/</span>
+        <span>{{ subject.name }}</span>
+    </nav>
+    <div class="subject-title-row">
+        <h1 class="section-title">{{ subject.name }}</h1>
+        {% if not static_export %}<a href="{{ url_for('edit_subject', section_id=section.id, category_id=category.id, subject_id=subject.id) }}" class="edit-link">编辑</a>{% endif %}
+    </div>
+</header>
+
+<div class="subject-content content-body">
+    {% if content %}
+    {{ content | safe }}
+    {% else %}
+    <p class="placeholder">本页暂无内容。{% if not static_export %}点击右上角「编辑」可添加内容、图片与文件链接。{% endif %}</p>
+    {% endif %}
+</div>
+{% endblock %}

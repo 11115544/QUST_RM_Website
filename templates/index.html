@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <div class="hero-logos">
+        <img src="{{ url_for('static', filename='images/qust-badge.png') }}" alt="青岛科技大学校徽" class="hero-logo hero-logo-qust">
+        <img src="{{ url_for('static', filename='images/team-logo.jpg') }}" alt="YKTKEMIAO 战队 Logo" class="hero-logo hero-logo-team">
+    </div>
+    <h1 class="page-title">青岛科技大学 <span class="page-title-accent">YKTKEMIAO</span> 战队</h1>
+    <p class="page-desc">打造顶尖机甲战队，征战 RoboMaster 赛场</p>
+    <div class="page-actions page-actions-hero">
+        <a href="{{ url_for('section', section_id='about') }}" class="btn btn-outline-light">了解战队</a>
+        <a href="{{ url_for('section', section_id='recruit') }}" class="btn btn-primary-lg">加入我们</a>
+    </div>
+</div>
+
+<section class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-item">
+            <span class="stat-value">2024</span>
+            <span class="stat-label">建队年份</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">1+</span>
+            <span class="stat-label">获奖次数</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">22人</span>
+            <span class="stat-label">核心成员</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">步兵</span>
+            <span class="stat-label">自研机器人</span>
+        </div>
+    </div>
+</section>
+
+<section class="robot-showcase">
+    <div class="robot-showcase-bg" aria-hidden="true" style="background-image: url({{ url_for('static', filename='images/infantry.png') }})"></div>
+    <div class="robot-showcase-content">
+        <h2 class="robot-showcase-title">自研步兵机器人</h2>
+        <p class="robot-showcase-desc">麦轮底盘 · 云台发射机构 · 全自主设计研发</p>
+        <a href="{{ url_for('section', section_id='gallery') }}" class="btn btn-outline-light">查看战队风采</a>
+    </div>
+    <div class="robot-showcase-image">
+        <img src="{{ url_for('static', filename='images/infantry.png') }}" alt="步兵机器人设计线图" loading="lazy">
+    </div>
+</section>
+
+<section class="section-directions">
+    <h2 class="section-modules-title">研发方向</h2>
+    <p class="section-directions-desc">战队研发所涉及的技术领域，涵盖机械、电控、算法、视觉等方向</p>
+    <div class="directions-grid">
+        <div class="direction-card">
+            <span class="direction-icon">⚙️</span>
+            <h3 class="direction-title">机械基础与设计</h3>
+            <p class="direction-desc">机械原理、机械设计、互换性、工程材料、制图、CAD 基础</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">🔌</span>
+            <h3 class="direction-title">电子与电路</h3>
+            <p class="direction-desc">数电/模电、PCB 设计、电路仿真、信号与电源</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">📟</span>
+            <h3 class="direction-title">嵌入式开发</h3>
+            <p class="direction-desc">单片机/STM32、C++/QT、Linux 应用、BSP 驱动、嵌入式 GUI</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">🎛️</span>
+            <h3 class="direction-title">控制理论</h3>
+            <p class="direction-desc">自动/现代/智能控制、PID·LQR·MPC、MATLAB/Simulink</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">👁️</span>
+            <h3 class="direction-title">机器视觉与三维算法</h3>
+            <p class="direction-desc">三维测量与重建、SLAM、点云与特征、曲线曲面建模、OpenCV</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">🐧</span>
+            <h3 class="direction-title">Linux 与机器人</h3>
+            <p class="direction-desc">Linux 基础、嵌入式 Linux、ROS/ROS2、Gazebo</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">💻</span>
+            <h3 class="direction-title">编程与程序开发</h3>
+            <p class="direction-desc">C/C++/Python、界面编程、并行计算、驱动与通讯、编程平台与调试</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">📊</span>
+            <h3 class="direction-title">CAD/CAE 与 3D 工具</h3>
+            <p class="direction-desc">SolidWorks/Blender、ANSYS/ADAMS、Meshlab/CloudCompare、有限元</p>
+        </div>
+        <div class="direction-card">
+            <span class="direction-icon">🌐</span>
+            <h3 class="direction-title">物联网与上位机</h3>
+            <p class="direction-desc">通信协议、上位机、数据库、云平台</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-modules">
+    <h2 class="section-modules-title">站点导航</h2>
+    <div class="section-grid">
+        <a href="{{ url_for('section', section_id='about') }}" class="section-card">
+            <span class="card-icon">🏛️</span>
+            <h3 class="card-title">战队简介</h3>
+            <p class="card-brief">探索成长历程、团队架构与核心价值观，认识并肩作战的伙伴。</p>
+        </a>
+        <a href="{{ url_for('section', section_id='honors') }}" class="section-card">
+            <span class="card-icon">🏆</span>
+            <h3 class="card-title">荣誉展示</h3>
+            <p class="card-brief">赛事获奖、科技类奖项与赞助合作荣誉，见证战队的每一次突破。</p>
+        </a>
+        <a href="{{ url_for('section', section_id='gallery') }}" class="section-card">
+            <span class="card-icon">🤖</span>
+            <h3 class="card-title">战队风采</h3>
+            <p class="card-brief">训练日常、赛事瞬间、机器人测试与核心队员介绍，感受真实战队氛围。</p>
+        </a>
+        <a href="{{ url_for('section', section_id='sponsor') }}" class="section-card">
+            <span class="card-icon">🤝</span>
+            <h3 class="card-title">赞助合作</h3>
+            <p class="card-brief">赞助政策、合作案例与对接方式，携手共建顶尖机甲战队。</p>
+        </a>
+        <a href="{{ url_for('section', section_id='recruit') }}" class="section-card section-card-recruit">
+            <span class="card-icon">📢</span>
+            <h3 class="card-title">新人招募</h3>
+            <p class="card-brief">机械、电控、算法、运营、宣传等组别持续招募，填写报名表加入我们。</p>
+        </a>
+    </div>
+</section>
+
+<section class="section-news">
+    <h2 class="section-modules-title">最新动态</h2>
+    <div class="news-list">
+        <a href="{{ url_for('section', section_id='honors') }}" class="news-item">
+            <span class="news-date">2025-04</span>
+            <span class="news-text">RoboMaster 2025 高校联盟赛山东站步兵对抗赛三等奖</span>
+        </a>
+        <a href="{{ url_for('section', section_id='about') }}" class="news-item">
+            <span class="news-date">2024-11</span>
+            <span class="news-text">战队正式组建，自研步兵机器人立项</span>
+        </a>
+        <a href="{{ url_for('section', section_id='gallery') }}" class="news-item">
+            <span class="news-date">—</span>
+            <span class="news-text">训练与赛事精彩瞬间，详见战队风采</span>
+        </a>
+    </div>
+</section>
+{% endblock %}

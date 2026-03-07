@@ -1,0 +1,116 @@
+[
+  {
+    "id": "about",
+    "name": "战队简介",
+    "brief": "发展历程、组织架构、核心宗旨与成员",
+    "icon": "🏛️",
+    "categories": [
+      {
+        "id": "history",
+        "name": "发展历程",
+        "icon": "📜",
+        "subjects": [
+          { "id": "team", "name": "队史与建队" },
+          { "id": "org", "name": "组织架构" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "honors",
+    "name": "荣誉展示",
+    "brief": "赛事获奖、科技类奖项与赞助合作荣誉",
+    "icon": "🏆",
+    "categories": [
+      {
+        "id": "events",
+        "name": "赛事荣誉",
+        "icon": "🏆",
+        "subjects": [
+          { "id": "2025", "name": "2025 赛季" }
+        ]
+      },
+      {
+        "id": "tech",
+        "name": "科技类奖项",
+        "icon": "🧪",
+        "subjects": [
+          { "id": "tech-awards", "name": "科技竞赛与创新奖项" }
+        ]
+      },
+      {
+        "id": "sponsor-honors",
+        "name": "赞助合作荣誉",
+        "icon": "🤝",
+        "subjects": [
+          { "id": "partners", "name": "合作单位与荣誉" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "retired",
+    "name": "退役队员",
+    "brief": "历届退役队员名单与介绍",
+    "icon": "👋",
+    "categories": [
+      {
+        "id": "members",
+        "name": "退役名单",
+        "icon": "👋",
+        "subjects": [
+          { "id": "list", "name": "退役队员名单" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gallery",
+    "name": "战队风采",
+    "brief": "训练日常、赛事瞬间、机器人测试与队员介绍",
+    "icon": "🤖",
+    "categories": [
+      {
+        "id": "media",
+        "name": "媒体素材",
+        "icon": "📷",
+        "subjects": [
+          { "id": "photos", "name": "照片与视频" },
+          { "id": "members", "name": "核心队员介绍" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "recruit",
+    "name": "新人招募",
+    "brief": "招募组别、要求与报名方式",
+    "icon": "📢",
+    "categories": [
+      {
+        "id": "notice",
+        "name": "招募说明",
+        "icon": "📢",
+        "subjects": [
+          { "id": "recruit", "name": "招募信息与报名" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sponsor",
+    "name": "赞助合作",
+    "brief": "赞助政策、合作案例与对接方式",
+    "icon": "🤝",
+    "categories": [
+      {
+        "id": "policy",
+        "name": "赞助与联系",
+        "icon": "🤝",
+        "subjects": [
+          { "id": "sponsor", "name": "赞助权益与联系方式" }
+        ]
+      }
+    ]
+  }
+]

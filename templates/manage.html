@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}管理 · 板块 / 分类 / 子页{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <h1 class="page-title">管理</h1>
+    <p class="page-desc">增删改 板块、分类、子页。修改后立即生效。各子页内容可在对应页面点击「编辑」修改 Markdown。</p>
+</div>
+
+<div class="manage-actions">
+    <button type="button" class="btn btn-primary" id="btnAddSection">+ 添加板块</button>
+</div>
+
+<div id="sectionList" class="manage-tree"></div>
+
+<div id="modal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+        <h3 class="modal-title" id="modalTitle">编辑</h3>
+        <div class="modal-body">
+            <p class="form-row"><label>名称 <input type="text" id="inputName" placeholder="必填"></label></p>
+            <p class="form-row" id="rowBrief"><label>简介 <input type="text" id="inputBrief" placeholder="选填"></label></p>
+            <p class="form-row" id="rowIcon"><label>图标 <input type="text" id="inputIcon" placeholder="如 🏠" maxlength="4"></label></p>
+            <p class="form-row" id="rowId"><label>ID <input type="text" id="inputId" placeholder="英文/数字，选填自动生成"></label></p>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary" id="modalSave">保存</button>
+            <button type="button" class="btn btn-secondary modal-cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var api = "/api/sections";
+    var listEl = document.getElementById("sectionList");
+    var modal = document.getElementById("modal");
+    var modalTitle = document.getElementById("modalTitle");
+    var inputName = document.getElementById("inputName");
+    var inputBrief = document.getElementById("inputBrief");
+    var inputIcon = document.getElementById("inputIcon");
+    var inputId = document.getElementById("inputId");
+    var rowBrief = document.getElementById("rowBrief");
+    var rowIcon = document.getElementById("rowIcon");
+    var rowId = document.getElementById("rowId");
+    var currentEdit = null;
+
+    function showModal(title, opts) {
+        currentEdit = opts || null;
+        modalTitle.textContent = title;
+        inputName.value = opts && opts.name ? opts.name : "";
+        inputBrief.value = opts && opts.brief ? opts.brief : "";
+        inputIcon.value = opts && opts.icon ? opts.icon : "";
+        inputId.value = opts && opts.id ? opts.id : "";
+        rowBrief.style.display = opts && opts.showBrief !== false ? "block" : "none";
+        rowIcon.style.display = opts && opts.showIcon !== false ? "block" : "none";
+        rowId.style.display = opts && opts.showId !== false ? "block" : "none";
+        modal.hidden = false;
+    }
+
+    function hideModal() {
+        modal.hidden = true;
+        currentEdit = null;
+    }
+
+    modal.querySelector(".modal-backdrop").addEventListener("click", hideModal);
+    modal.querySelector(".modal-cancel").addEventListener("click", hideModal);
+
+    function fetchSections() {
+        return fetch(api).then(function(r) { return r.json(); });
+    }
+
+    function escapeHtml(s) {
+        if (!s) return "";
+        var d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    function render() {
+        fetchSections().then(function(sections) {
+            listEl.innerHTML = "";
+            sections.forEach(function(sec) {
+                var secDiv = document.createElement("div");
+                secDiv.className = "manage-section";
+                secDiv.innerHTML =
+                    "<div class=\"manage-section-head\">" +
+                    "  <span class=\"manage-expand\">▶</span>" +
+                    "  <span class=\"manage-icon\">" + (sec.icon || "📁") + "</span>" +
+                    "  <span class=\"manage-name\">" + escapeHtml(sec.name) + "</span>" +
+                    "  <span class=\"manage-brief\">" + escapeHtml(sec.brief || "") + "</span>" +
+                    "  <button type=\"button\" class=\"btn-small btn-edit\" data-section-id=\"" + escapeHtml(sec.id) + "\">编辑</button>" +
+                    "  <button type=\"button\" class=\"btn-small btn-del btn-del-section\" data-section-id=\"" + escapeHtml(sec.id) + "\">删除</button>" +
+                    "  <button type=\"button\" class=\"btn-small btn-add-cat\" data-section-id=\"" + escapeHtml(sec.id) + "\">+ 分类</button>" +
+                    "</div>" +
+                    "<div class=\"manage-section-body\"></div>";
+                var body = secDiv.querySelector(".manage-section-body");
+                var expand = secDiv.querySelector(".manage-expand");
+                (sec.categories || []).forEach(function(cat) {
+                    var catDiv = document.createElement("div");
+                    catDiv.className = "manage-category";
+                    catDiv.innerHTML =
+                        "<div class=\"manage-cat-head\">" +
+                        "  <span class=\"manage-expand\">▶</span>" +
+                        "  <span class=\"manage-name\">" + escapeHtml(cat.name) + "</span>" +
+                        "  <button type=\"button\" class=\"btn-small btn-edit-cat\" data-section-id=\"" + escapeHtml(sec.id) + "\" data-cat-id=\"" + escapeHtml(cat.id) + "\">编辑</button>" +
+                        "  <button type=\"button\" class=\"btn-small btn-del btn-del-cat\" data-section-id=\"" + escapeHtml(sec.id) + "\" data-cat-id=\"" + escapeHtml(cat.id) + "\">删除</button>" +
+                        "  <button type=\"button\" class=\"btn-small btn-add-subj\" data-section-id=\"" + escapeHtml(sec.id) + "\" data-cat-id=\"" + escapeHtml(cat.id) + "\">+ 子页</button>" +
+                        "</div>" +
+                        "<ul class=\"manage-subjects\"></ul>";
+                    var subjList = catDiv.querySelector(".manage-subjects");
+                    (cat.subjects || []).forEach(function(subj) {
+                        var li = document.createElement("li");
+                        li.innerHTML =
+                            "<span class=\"manage-name\">" + escapeHtml(subj.name) + "</span>" +
+                            " <button type=\"button\" class=\"btn-small btn-edit-subj\" data-section-id=\"" + escapeHtml(sec.id) + "\" data-cat-id=\"" + escapeHtml(cat.id) + "\" data-subj-id=\"" + escapeHtml(subj.id) + "\">编辑</button>" +
+                            " <button type=\"button\" class=\"btn-small btn-del btn-del-subj\" data-section-id=\"" + escapeHtml(sec.id) + "\" data-cat-id=\"" + escapeHtml(cat.id) + "\" data-subj-id=\"" + escapeHtml(subj.id) + "\">删除</button>";
+                        subjList.appendChild(li);
+                    });
+                    body.appendChild(catDiv);
+                });
+                secDiv.querySelector(".manage-section-head").addEventListener("click", function(e) {
+                    if (!e.target.closest("button")) {
+                        secDiv.classList.toggle("open");
+                        expand.textContent = secDiv.classList.contains("open") ? "▼" : "▶";
+                    }
+                });
+                listEl.appendChild(secDiv);
+            });
+            bindButtons();
+        });
+    }
+
+    function bindButtons() {
+        listEl.querySelectorAll(".btn-add-cat").forEach(function(btn) {
+            btn.onclick = function() {
+                var sid = this.getAttribute("data-section-id");
+                showModal("添加分类", { sectionId: sid, showBrief: false, showIcon: false });
+            };
+        });
+        listEl.querySelectorAll(".btn-edit").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation(); editSection(this.getAttribute("data-section-id")); };
+        });
+        listEl.querySelectorAll(".btn-del-section").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation(); if (confirm("确定删除该板块？")) delSection(this.getAttribute("data-section-id")); };
+        });
+        listEl.querySelectorAll(".btn-edit-cat").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation(); editCat(btn.getAttribute("data-section-id"), btn.getAttribute("data-cat-id")); };
+        });
+        listEl.querySelectorAll(".btn-del-cat").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation(); if (confirm("确定删除该分类？")) delCat(btn.getAttribute("data-section-id"), btn.getAttribute("data-cat-id")); };
+        });
+        listEl.querySelectorAll(".btn-add-subj").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation();
+                showModal("添加子页", { sectionId: btn.getAttribute("data-section-id"), categoryId: btn.getAttribute("data-cat-id"), showBrief: false, showIcon: false });
+            };
+        });
+        listEl.querySelectorAll(".btn-edit-subj").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation(); editSubj(btn.getAttribute("data-section-id"), btn.getAttribute("data-cat-id"), btn.getAttribute("data-subj-id")); };
+        });
+        listEl.querySelectorAll(".btn-del-subj").forEach(function(btn) {
+            btn.onclick = function(e) { e.stopPropagation(); if (confirm("确定删除该子页？")) delSubj(btn.getAttribute("data-section-id"), btn.getAttribute("data-cat-id"), btn.getAttribute("data-subj-id")); };
+        });
+        listEl.querySelectorAll(".manage-cat-head").forEach(function(head) {
+            head.addEventListener("click", function(e) {
+                if (!e.target.closest("button")) {
+                    var cat = head.parentElement;
+                    cat.classList.toggle("open");
+                    var arrow = head.querySelector(".manage-expand");
+                    if (arrow) arrow.textContent = cat.classList.contains("open") ? "▼" : "▶";
+                }
+            });
+        });
+    }
+
+    function editSection(id) {
+        fetch(api).then(function(r) { return r.json(); }).then(function(sections) {
+            var s = sections.find(function(x) { return x.id === id; });
+            if (s) showModal("编辑板块", { type: "section", id: s.id, name: s.name, brief: s.brief, icon: s.icon });
+        });
+    }
+    function delSection(id) {
+        fetch(api + "/" + id, { method: "DELETE" }).then(function() { render(); });
+    }
+    function editCat(sid, cid) {
+        fetch(api).then(function(r) { return r.json(); }).then(function(sections) {
+            var s = sections.find(function(x) { return x.id === sid; });
+            var c = s && (s.categories || []).find(function(x) { return x.id === cid; });
+            if (c) showModal("编辑分类", { type: "category", sectionId: sid, id: c.id, name: c.name });
+        });
+    }
+    function delCat(sid, cid) {
+        fetch(api + "/" + sid + "/categories/" + cid, { method: "DELETE" }).then(function() { render(); });
+    }
+    function editSubj(sid, cid, subid) {
+        fetch(api).then(function(r) { return r.json(); }).then(function(sections) {
+            var s = sections.find(function(x) { return x.id === sid; });
+            var c = s && (s.categories || []).find(function(x) { return x.id === cid; });
+            var sub = c && (c.subjects || []).find(function(x) { return x.id === subid; });
+            if (sub) showModal("编辑子页", { type: "subject", sectionId: sid, categoryId: cid, id: sub.id, name: sub.name });
+        });
+    }
+    function delSubj(sid, cid, subid) {
+        fetch(api + "/" + sid + "/categories/" + cid + "/subjects/" + subid, { method: "DELETE" }).then(function() { render(); });
+    }
+
+    document.getElementById("btnAddSection").onclick = function() {
+        showModal("添加板块", { showId: true });
+    };
+
+    document.getElementById("modalSave").onclick = function() {
+        var name = inputName.value.trim();
+        if (!name) { alert("请填写名称"); return; }
+        var o = currentEdit || {};
+        if (o.type === "section" && o.id) {
+            fetch(api + "/" + o.id, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name, brief: inputBrief.value.trim(), icon: inputIcon.value.trim() }) })
+                .then(function(r) { return r.json(); }).then(function() { hideModal(); render(); });
+        } else if (!o.sectionId && !o.categoryId) {
+            fetch(api, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name, brief: inputBrief.value.trim(), icon: inputIcon.value.trim() || "📁", id: inputId.value.trim() || undefined }) })
+                .then(function(r) { return r.json(); }).then(function() { hideModal(); render(); }).catch(function(e) { alert(e.message || "保存失败"); });
+        } else if (o.type === "category" && o.sectionId && o.id) {
+            fetch(api + "/" + o.sectionId + "/categories/" + o.id, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name }) })
+                .then(function(r) { return r.json(); }).then(function() { hideModal(); render(); });
+        } else if (o.sectionId && !o.categoryId) {
+            fetch(api + "/" + o.sectionId + "/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name, id: inputId.value.trim() || undefined }) })
+                .then(function(r) { return r.json(); }).then(function() { hideModal(); render(); }).catch(function(e) { alert(e.message || "保存失败"); });
+        } else if (o.type === "subject" && o.sectionId && o.categoryId && o.id) {
+            fetch(api + "/" + o.sectionId + "/categories/" + o.categoryId + "/subjects/" + o.id, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name }) })
+                .then(function(r) { return r.json(); }).then(function() { hideModal(); render(); });
+        } else if (o.sectionId && o.categoryId) {
+            fetch(api + "/" + o.sectionId + "/categories/" + o.categoryId + "/subjects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: name, id: inputId.value.trim() || undefined }) })
+                .then(function(r) { return r.json(); }).then(function() { hideModal(); render(); }).catch(function(e) { alert(e.message || "保存失败"); });
+        }
+    };
+
+    render();
+})();
+</script>
+{% endblock %}

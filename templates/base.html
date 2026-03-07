@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}战队首页{% endblock %} | 青岛科技大学 YKTKEMIAO 战队</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <div class="header-bg" aria-hidden="true">
+        <div class="header-bg-slide" style="background-image: url({{ url_for('static', filename='images/banner/banner-1.jpg') }})"></div>
+        <div class="header-bg-slide" style="background-image: url({{ url_for('static', filename='images/banner/banner-2.png') }})"></div>
+        <div class="header-bg-slide" style="background-image: url({{ url_for('static', filename='images/banner/banner-5.png') }})"></div>
+        <div class="header-bg-slide" style="background-image: url({{ url_for('static', filename='images/banner/banner-6.png') }})"></div>
+        <div class="header-bg-overlay"></div>
+    </div>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="{{ url_for('index') }}" class="logo" title="战队首页">
+                <img src="{{ url_for('static', filename='images/team-logo.jpg') }}" alt="" class="logo-img"> 青岛科技大学 YKTKEMIAO 战队</a>
+            <button type="button" class="nav-toggle" aria-label="打开菜单" id="navToggle"></button>
+            <nav class="nav-main" id="navMain">
+                <a href="{{ url_for('index') }}" class="{% if current_page == 'index' %}active{% endif %}">首页</a>
+                <a href="{{ url_for('section', section_id='about') }}" class="{% if current_page == 'about' %}active{% endif %}">战队简介</a>
+                <a href="{{ url_for('section', section_id='honors') }}" class="{% if current_page == 'honors' %}active{% endif %}">荣誉展示</a>
+                <a href="{{ url_for('section', section_id='gallery') }}" class="{% if current_page == 'gallery' %}active{% endif %}">战队风采</a>
+                <a href="{{ url_for('subject', section_id='gallery', category_id='media', subject_id='members') }}" class="{% if current_page == 'members' %}active{% endif %}">战队成员</a>
+                <a href="{{ url_for('subject', section_id='retired', category_id='members', subject_id='list') }}" class="{% if current_page == 'retired' %}active{% endif %}">退役队员</a>
+                <a href="{{ url_for('subject', section_id='about', category_id='history', subject_id='team') }}" class="{% if current_page == 'history' %}active{% endif %}">队史</a>
+                <a href="{{ url_for('section', section_id='recruit') }}" class="{% if current_page == 'recruit' %}active{% endif %}">新人招募</a>
+                <a href="{{ url_for('section', section_id='sponsor') }}" class="{% if current_page == 'sponsor' %}active{% endif %}">赞助合作</a>
+                {% if show_manage %}<a href="{{ url_for('manage') }}" class="{% if current_page == 'manage' %}active{% endif %}">管理</a>{% endif %}
+            </nav>
+        </div>
+    </header>
+    <main class="main-wrapper">
+        <aside class="rm-official-sidebar">
+            <a href="https://www.robomaster.com/zh-CN" target="_blank" rel="noopener" class="rm-official-link" title="RoboMaster 机甲大师官网">
+                <img src="{{ url_for('static', filename='images/robomaster-logo.png') }}" alt="RoboMaster" class="rm-official-logo">
+                <span class="rm-official-label">机甲大师官网</span>
+            </a>
+        </aside>
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+        <aside class="research-sidebar">
+            <h3 class="sidebar-title">招募亮点</h3>
+            <ul class="sidebar-highlights">
+                <li><strong>机械组</strong> — 结构设计、加工装配</li>
+                <li><strong>电控组</strong> — 嵌入式、整车控制</li>
+                <li><strong>算法组</strong> — 视觉、决策、仿真</li>
+                <li><strong>运营组</strong> — 物资、经费、协调</li>
+                <li><strong>宣传组</strong> — 招新、摄影、新媒体</li>
+            </ul>
+            <p class="sidebar-desc">参与 RoboMaster 赛事研发与实战，与团队一起征战赛场。</p>
+            <a href="{{ url_for('section', section_id='recruit') }}" class="btn btn-secondary sidebar-link">查看招募详情与报名</a>
+            <div class="sidebar-douyin">
+                <h4 class="sidebar-douyin-title">扫码关注抖音</h4>
+                <a href="{{ url_for('static', filename='images/douyin-qrcode.jpg') }}" target="_blank" rel="noopener" class="sidebar-douyin-qr" title="青岛科大YKTKEMIAO 抖音号: dy_qustYKT">
+                    <img src="{{ url_for('static', filename='images/douyin-qrcode.jpg') }}" alt="青岛科大YKTKEMIAO 抖音二维码">
+                </a>
+                <p class="sidebar-douyin-desc">抖音号 dy_qustYKT</p>
+            </div>
+            <div class="sidebar-bilibili-block">
+                <h4 class="sidebar-douyin-title">点击访问 Bilibili 战队官号</h4>
+                <a href="https://space.bilibili.com/3546788998941154" rel="noopener" target="_blank" class="btn btn-secondary sidebar-bilibili" title="青岛科大YKTKEMIAO战队 Bilibili 空间">Bilibili</a>
+            </div>
+        </aside>
+    </main>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-col footer-about">
+                <h4 class="footer-heading">关于我们</h4>
+                <p>青岛科技大学 YKTKEMIAO 战队，参与 RoboMaster 机甲大师高校联盟赛，致力于研发与竞技。</p>
+            </div>
+            <div class="footer-col footer-contact">
+                <h4 class="footer-heading">联系我们</h4>
+                <p>招新与赞助请联系战队负责人（详见招募与赞助页面）。</p>
+            </div>
+            <div class="footer-col footer-social">
+                <h4 class="footer-heading">关注我们</h4>
+                <p class="footer-links">
+                    <a href="https://space.bilibili.com/3546788998941154" rel="noopener" target="_blank" title="青岛科大YKTKEMIAO战队 Bilibili 空间">Bilibili</a>
+                    <span class="footer-sep">·</span>
+                    <a href="{{ url_for('static', filename='images/douyin-qrcode.jpg') }}" rel="noopener" target="_blank" title="青岛科大YKTKEMIAO 抖音 dy_qustYKT，QQ: 2823908729">抖音</a>
+                    <span class="footer-sep">·</span>
+                    <a href="#" rel="noopener" target="_blank">GitHub</a>
+                    <span class="footer-sep">·</span>
+                    <a href="#">公众号</a>
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <img src="{{ url_for('static', filename='images/robomaster-logo.png') }}" alt="RoboMaster 机甲大师" class="footer-rm-logo">
+            <p class="footer-copy">© 2026 青岛科技大学 YKTKEMIAO 战队 版权所有</p>
+        </div>
+    </footer>
+    <script>
+    (function() {
+        var toggle = document.getElementById('navToggle');
+        var nav = document.getElementById('navMain');
+        if (toggle && nav) {
+            toggle.addEventListener('click', function() {
+                nav.classList.toggle('open');
+                toggle.classList.toggle('open');
+            });
+        }
+    })();
+    </script>
+</body>
+</html>

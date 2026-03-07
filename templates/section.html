@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ section.name }}{% endblock %}
+{% block content %}
+<header class="section-header">
+    <h1 class="section-title"><span class="section-icon">{{ section.icon }}</span> {{ section.name }}</h1>
+    <p class="section-brief">{{ section.brief }}</p>
+</header>
+
+<div class="category-list category-list-cards">
+    {% for cat in section.categories %}
+    <section class="category-section">
+        <h2 class="category-section-title">
+            <span class="category-section-icon">{{ cat.icon or section.icon }}</span>
+            {{ cat.name }}
+        </h2>
+        <div class="subject-cards-grid">
+            {% for subj in cat.subjects %}
+            <div class="subject-card">
+                <a href="{{ url_for('subject', section_id=section.id, category_id=cat.id, subject_id=subj.id) }}" class="subject-card-link">
+                    <span class="subject-card-icon">{{ cat.icon or section.icon }}</span>
+                    <h3 class="subject-card-title">{{ subj.name }}</h3>
+                    <span class="subject-card-arrow">→</span>
+                </a>
+                {% if not static_export %}
+                <a href="{{ url_for('edit_subject', section_id=section.id, category_id=cat.id, subject_id=subj.id) }}" class="subject-card-edit" title="编辑">编辑</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+</div>
+{% endblock %}
